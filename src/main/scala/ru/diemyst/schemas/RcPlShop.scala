@@ -10,7 +10,7 @@ case class RcPlShopRow(id: Option[Int],
                        quantity: Option[Int],
                        retailPrice: Option[Double],
                        dealerPrice: Option[Double],
-                       photo: Option[String]){}
+                       photo: Option[String])
 
 trait RcPlShopComponent { this: DriverComponent =>
   import driver.api._
