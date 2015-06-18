@@ -25,8 +25,6 @@ object RcPlShopParse {
     val xmlSrc = scala.io.Source.fromURL("http://rcplaneta.ru/Excel/files/products_rc.xml")("utf-8")
     val xmlParse = () => new XMLEventReader(xmlSrc)
 
-    Source(xmlParse).groupBy()
-
     val rcPlanetaSource = Source(xmlParse)
       .filter {
       case EvElemStart(_, "item", data, _) => true

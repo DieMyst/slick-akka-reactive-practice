@@ -3,6 +3,7 @@ package ru.diemyst.parse
 import akka.stream.stage.{Context, StageState, StatefulStage, SyncDirective}
 import ru.diemyst.schemas.BrShopRow
 
+import scala.io.Source
 import scala.xml.pull.{EvElemEnd, EvElemStart, EvText, XMLEvent}
 import scala.xml._
 
@@ -12,9 +13,33 @@ import scala.xml._
  */
 
 object TestObj extends App {
-  val xml = XML.loadFile("inputFile")
-  val threadsXml = xml \\ "thread"
-  val postsXml = xml \\ "post"
+  def processSource[T](input: Source)(f: NodeSeq => T) {
+    new scala.xml.parsing.ConstructingParser(input, false) {
+      nextch // initialize per documentation
+      document // trigger parsing by requesting document
+
+      override def elemStart(pos: Int, pre: String, label: String,
+                             attrs: MetaData, scope: NamespaceBinding) {
+        super.elemStart(pos, pre, label, attrs, scope)
+      }
+      override def elemEnd(pos: Int, pre: String, label: String) {
+        super.elemEnd(pos, pre, label)
+      }
+      override def elem(pos: Int, pre: String, label: String, attrs: MetaData,
+                        pscope: NamespaceBinding, empty: Boolean, nodes: NodeSeq): NodeSeq = {
+        val node = super.elem(pos, pre, label, attrs, pscope, empty, nodes)
+        label match {
+          case "offer" => f(node); NodeSeq.Empty // process and discard employee nodes
+          case _ => node // roll up other nodes
+        }
+      }
+    }
+  }
+
+  processSource(scala.io.Source.fromFile("C:\\projects\\slick-akka-reactive-examples\\xml_opts.xml")("cp1251")){ node =>
+    // process here
+    println(node)
+  }
 }
 
 class BrOfferStage() extends StatefulStage[XMLEvent, BrShopRow] {
@@ -63,9 +88,6 @@ class BrOfferStage() extends StatefulStage[XMLEvent, BrShopRow] {
                           var name: Option[String] = None,
                           var description: Option[String] = None,
                           var article: Option[String] = None) {
-    def toRow(): BrShopRow = {
-      BrShopRow
-    }
   }
 
 }
