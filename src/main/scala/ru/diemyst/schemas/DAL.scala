@@ -6,10 +6,10 @@ import slick.driver.JdbcProfile
  * Date 16.06.2015
  */
 class DAL(val driver: JdbcProfile)
-  extends DriverComponent with ShopComponent {
+  extends DriverComponent with RcPlShopComponent {
   import driver.api._
 
   def create() = {
-    DBIO.seq(rcPlanet.schema.create)
+    DBIO.seq(rcPl.schema.create)
   }
 }

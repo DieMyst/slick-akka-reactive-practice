@@ -4,7 +4,7 @@ package ru.diemyst.schemas
  * Created by DSHakhtarin 
  * Date 16.06.2015
  */
-case class ShopRow(id: Option[Int],
+case class RcPlShopRow(id: Option[Int],
                        article: String,
                        name: String,
                        quantity: Option[Int],
@@ -12,10 +12,10 @@ case class ShopRow(id: Option[Int],
                        dealerPrice: Option[Double],
                        photo: Option[String]){}
 
-trait ShopComponent { this: DriverComponent =>
+trait RcPlShopComponent { this: DriverComponent =>
   import driver.api._
 
-  class Shop(tag: Tag) extends Table[ShopRow](tag, "RC_PLANET"){
+  class RcPlShop(tag: Tag) extends Table[RcPlShopRow](tag, "RCPL_SHOP"){
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def article = column[String]("article")
     def name = column[String]("name")
@@ -24,13 +24,13 @@ trait ShopComponent { this: DriverComponent =>
     def dealerPrice = column[Double]("dealer_price", O.Default(0.0))
     def photo = column[String]("photo")
 
-    override def * = (id.?, article, name, quantity.?, retailPrice.?, dealerPrice.?, photo.?) <> (ShopRow.tupled, ShopRow.unapply)
+    override def * = (id.?, article, name, quantity.?, retailPrice.?, dealerPrice.?, photo.?) <> (RcPlShopRow.tupled, RcPlShopRow.unapply)
   }
 
-  val rcPlanet = TableQuery[Shop]
+  val rcPl = TableQuery[RcPlShop]
 
-  def insertBatch(batch: Seq[ShopRow]) = {
-    rcPlanet ++= batch
+  def insertBatch(batch: Seq[RcPlShopRow]) = {
+    rcPl ++= batch
   }
 }
 

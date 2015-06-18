@@ -3,7 +3,7 @@ package ru.diemyst
 import akka.actor.ActorSystem
 import akka.stream.ActorFlowMaterializer
 import akka.stream.scaladsl.{Sink, Source}
-import ru.diemyst.schemas.{Util, DAL, ShopRow}
+import ru.diemyst.schemas.{Util, DAL, RcPlShopRow}
 import slick.jdbc.JdbcBackend.Database
 
 import scala.concurrent.Await
@@ -38,7 +38,7 @@ object TestApp extends App {
         case _ => false
       }.map {
         case EvElemStart(_, _, data, _) =>
-          ShopRow(None,
+          RcPlShopRow(None,
             data.get("article"),
             data.get("name"),
             data.get("qty"),
