@@ -2,14 +2,16 @@ package ru.diemyst.parse
 
 import java.io.PipedOutputStream
 
-import akka.actor.ActorSystem
+import akka.actor.{Props, ActorSystem}
 import akka.stream.ActorFlowMaterializer
+import akka.stream.actor.ActorPublisher
 import akka.stream.scaladsl.{Sink, Source}
 import ru.diemyst.schemas.DAL
 import slick.jdbc.JdbcBackend._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.xml.NodeSeq
 import scala.xml.pull.{EvElemStart, XMLEventReader}
 
 /**
@@ -22,14 +24,14 @@ object BrShopParse {
     //  val serverConnection = Tcp().outgoingConnection("", 8080)
 
     //  val getLines = () => scala.io.Source.fromURI(new URI("http://rcplaneta.ru/Excel/files/products_rc.xml"))
-    val xmlSrc = scala.io.Source.fromFile("C:\\projects\\slick-akka-reactive-examples\\xml_opts.xml")("cp1251")
-    val xmlParse = () => new XMLEventReader(xmlSrc)
+    val source = scala.io.Source.fromFile("C:\\projects\\slick-akka-reactive-examples\\xml_opts.xml")("cp1251")
+    val pubRef = system.actorOf(Props(classOf[BrActorPublisher], source))
+    val publisher = ActorPublisher[NodeSeq](pubRef)
 
-    val brShopSource = Source(xmlParse)
+    val brShopSource = Source(publisher)
       //    .map(seq => db.run(dal.insertBatch(seq)))
       .runWith(Sink.foreach(println))
 
-    Await.result(brShopSource, 10.seconds)
   }
 }
 
