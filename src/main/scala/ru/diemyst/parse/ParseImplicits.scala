@@ -1,6 +1,6 @@
 package ru.diemyst.parse
 
-import scala.xml.Node
+import scala.xml.{Node, NodeSeq}
 
 /**
  * Created by DSHakhtarin 
@@ -13,6 +13,18 @@ object ParseImplicits {
 
   implicit def optSeqNode2OptInt(opt: Option[Seq[Node]]): Option[Int] = {
     opt.flatMap(_.headOption).map(_.text.toInt)
+  }
+
+  implicit def optSeqNode2Int(opt: Option[Seq[Node]]): Int = {
+    opt.map(a => a.head.text.toInt).get
+  }
+
+  implicit def optSeqNode2Bool(opt: Option[Seq[Node]]): Boolean = {
+    opt.map(_.head.text.toBoolean).get
+  }
+
+  implicit def seqNode2OptInt(seq: NodeSeq): Option[Int] = {
+    seq.headOption.map(_.text.toInt)
   }
 
   implicit def optSeqNode2OptBoolean(opt: Option[Seq[Node]]): Option[Boolean] = {

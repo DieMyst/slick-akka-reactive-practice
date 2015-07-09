@@ -1,13 +1,13 @@
 package ru.diemyst.parse
 
 import akka.actor.ActorSystem
-import akka.stream.ActorFlowMaterializer
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source}
-import ru.diemyst.schemas.{RcPlShopRow, DAL}
+import ru.diemyst.schemas.{DAL, RcPlShopRow}
 import slick.jdbc.JdbcBackend._
-import scala.concurrent.duration._
 
 import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.xml.pull.{EvElemStart, XMLEventReader}
 
 /**
@@ -15,14 +15,14 @@ import scala.xml.pull.{EvElemStart, XMLEventReader}
  * Date 18.06.2015
  */
 object RcPlShopParse {
-  def run(dal: DAL, db: Database)(implicit system: ActorSystem, mat: ActorFlowMaterializer): Unit = {
+  def run(dal: DAL, db: Database)(implicit system: ActorSystem, mat: ActorMaterializer): Unit = {
     import ParseImplicits._
-    //  val serverConnection = Tcp().outgoingConnection("", 8080)
 
-    //  val getLines = () => scala.io.Source.fromURI(new URI("http://rcplaneta.ru/Excel/files/products_rc.xml"))
+    implicit val mat = ActorMaterializer()
+
     db.run(dal.create())
 
-    val xmlSrc = scala.io.Source.fromURL("http://rcplaneta.ru/Excel/files/products_rc.xml")("utf-8")
+    val xmlSrc = scala.io.Source.fromURL("")("utf-8")
     val xmlParse = () => new XMLEventReader(xmlSrc)
 
     val rcPlanetaSource = Source(xmlParse)

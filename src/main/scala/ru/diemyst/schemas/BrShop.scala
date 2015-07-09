@@ -11,7 +11,7 @@ case class BrShopRow(id: Option[Int],
                      price: Option[Int],
                      optPrice: Option[Int],
                      quantity: Option[Int],
-                     cateforyName: Option[String],
+                     categoryName: Option[String],
                      categoryId: Option[Int],
                      picture: Option[String],
                      vendor: Option[String],
@@ -23,7 +23,7 @@ case class BrShopRow(id: Option[Int],
 trait BrShopComponent { this: DriverComponent =>
   import driver.api._
 
-  /*class BrShop(tag: Tag) extends Table[BrShopRow](tag, "BR_SHOP"){
+  class BrShop(tag: Tag) extends Table[BrShopRow](tag, "BR_SHOP"){
     def id = column[Int]("id", O.PrimaryKey, O.AutoInc)
     def article = column[String]("article")
     def name = column[String]("name")
@@ -39,5 +39,5 @@ trait BrShopComponent { this: DriverComponent =>
 
   def insertBatch(batch: Seq[BrShopRow]) = {
     brShop ++= batch
-  }*/
+  }
 }
