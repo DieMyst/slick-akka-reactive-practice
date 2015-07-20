@@ -1,5 +1,7 @@
 package ru.diemyst.schemas
 
+import scala.concurrent.ExecutionContext.Implicits.global
+
 /**
  * Created by DSHakhtarin 
  * Date 16.06.2015
@@ -25,12 +27,16 @@ trait ShopComponent { this: DriverComponent =>
     def photo = column[String]("photo")
 
     override def * = (id.?, article, name, quantity.?, retailPrice.?, dealerPrice.?, photo.?) <> (ShopRow.tupled, ShopRow.unapply)
+
+    def articleIdx = index("article_idx", article, unique = true)
   }
 
   val rcPlanet = TableQuery[Shop]
 
-  def insertBatch(batch: Seq[ShopRow]) = {
-    rcPlanet ++= batch
+  def insertOrUpdateBatch(batch: Seq[ShopRow]) = {
+
+    rcPlanet.insertOrUpdate()
+
   }
 }
 

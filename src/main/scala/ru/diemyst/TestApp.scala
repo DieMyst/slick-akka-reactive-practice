@@ -1,13 +1,16 @@
 package ru.diemyst
 
+import java.sql.BatchUpdateException
+
 import akka.actor.ActorSystem
-import akka.stream.ActorFlowMaterializer
+import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source}
 import ru.diemyst.schemas.{Util, DAL, ShopRow}
 import slick.jdbc.JdbcBackend.Database
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
+import scala.util.{Failure, Success}
 import scala.xml.Node
 import scala.xml.pull._
 import slick.driver.PostgresDriver
@@ -20,16 +23,17 @@ object TestApp extends App {
   def run(dal: DAL, db: Database): Unit = {
     import ParseImplicits._
     import dal.driver.api._
+    import scala.concurrent.ExecutionContext.Implicits.global
     //  val serverConnection = Tcp().outgoingConnection("", 8080)
 
     //  val getLines = () => scala.io.Source.fromURI(new URI("http://rcplaneta.ru/Excel/files/products_rc.xml"))
 
     implicit val system = ActorSystem()
-    implicit val mat = ActorFlowMaterializer()
+    implicit val mat = ActorMaterializer()
 
-    db.run(dal.create())
+    println(Await.result(db.run(dal.create()), 10.second))
 
-    val xmlSrc = scala.io.Source.fromURL("link-to-xml")("utf-8")
+    val xmlSrc = scala.io.Source.fromURL("http://rcplaneta.ru/Excel/files/products_rc.xml")("utf-8")
     val xmlParse = () => new XMLEventReader(xmlSrc)
 
     val rcPlanetaSource = Source(xmlParse)
@@ -41,15 +45,27 @@ object TestApp extends App {
           ShopRow(None,
             data.get("article"),
             data.get("name"),
-            data.get("qty"),
+            Option(0),
             data.get("retail_price"),
             data.get("dealer_price"),
             data.get("photo"))
-      }.groupedWithin(60, 300.millis)
-      .map(seq => db.run(dal.insertBatch(seq)))
-      .runWith(Sink.foreach(println))
+      }.groupedWithin(2, 300.millis)
+      .map(seq => db.run(dal.insertOrUpdateBatch(seq)))
+      .map{f =>
+        f.onComplete{
+          case Success(x) => println(x)
+          case Failure(x) => proccessException(x)
+        }
+      }
+      .runWith(Sink.ignore)
+  }
 
-    Await.result(rcPlanetaSource, 10.seconds)
+  def proccessException(ex: Throwable): Unit = {
+    ex match {
+      case bEx: BatchUpdateException =>
+        println(bEx.getNextException)
+      case th@_ => println(th)
+    }
   }
 
   try {
